@@ -212,7 +212,7 @@ public abstract class ExtractTeamCityProjectConfigurationTask extends DefaultTas
             String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
             content = content.replaceAll("TeamCityTest", projectId);
             content = content.replaceAll("tctArtifactId", determineArtifactId(projectId));
-            content = content.replaceAll("tctGroup", getProject().getGroup().toString());
+            content = content.replaceAll("tctGroup", determineGroup(getProject().getGroup().toString()));
             Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
         }
     }
@@ -227,6 +227,18 @@ public abstract class ExtractTeamCityProjectConfigurationTask extends DefaultTas
                  .findFirst()
                  .map(MavenPublication::getArtifactId)
                  .orElse(projectId.toLowerCase(Locale.ROOT));
+    }
+
+    private String determineGroup(String fallback) {
+        return getProject().getExtensions().getByType(PublishingExtension.class)
+          .getPublications()
+          .stream()
+          .filter(MavenPublication.class::isInstance)
+          .map(MavenPublication.class::cast)
+          .filter(publication -> !publication.getName().contains("PluginMarker")) //Exclude gradles plugin markers!
+          .findFirst()
+          .map(MavenPublication::getGroupId)
+          .orElse(fallback.toLowerCase(Locale.ROOT));
     }
 
     /**
