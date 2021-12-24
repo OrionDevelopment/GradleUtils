@@ -226,7 +226,10 @@ public abstract class ExtractTeamCityProjectConfigurationTask extends DefaultTas
                  .filter(publication -> !publication.getName().contains("PluginMarker")) //Exclude gradles plugin markers!
                  .findFirst()
                  .map(MavenPublication::getArtifactId)
-                 .orElse(projectId.toLowerCase(Locale.ROOT));
+                 .orElseGet(() -> {
+                     getProject().getLogger().warn("Could not find the Maven artifact Id from normal publication falling back to the lower cased project name.");
+                     return projectId.toLowerCase();
+                 });
     }
 
     private String determineGroup(String fallback) {
@@ -238,7 +241,10 @@ public abstract class ExtractTeamCityProjectConfigurationTask extends DefaultTas
           .filter(publication -> !publication.getName().contains("PluginMarker")) //Exclude gradles plugin markers!
           .findFirst()
           .map(MavenPublication::getGroupId)
-          .orElse(fallback.toLowerCase(Locale.ROOT));
+          .orElseGet(() -> {
+              getProject().getLogger().warn("Could not find the Maven artifact Id from normal publication falling back to the lower cased project group.");
+              return fallback.toLowerCase();
+          });
     }
 
     /**
