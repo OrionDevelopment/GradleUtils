@@ -223,6 +223,7 @@ public abstract class ExtractTeamCityProjectConfigurationTask extends DefaultTas
                  .stream()
                  .filter(MavenPublication.class::isInstance)
                  .map(MavenPublication.class::cast)
+                 .filter(publication -> !publication.getName().contains("PluginMarker")) //Exclude gradles plugin markers!
                  .findFirst()
                  .map(MavenPublication::getArtifactId)
                  .orElse(projectId.toLowerCase(Locale.ROOT));
